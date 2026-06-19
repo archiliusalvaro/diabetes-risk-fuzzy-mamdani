@@ -32,23 +32,7 @@ def fz_aktiv(a):
     # Rendah: <30, Sedang: 20-70, Tinggi: >60
     return {"Rendah": zmf(a,15,40), "Sedang": trimf(a,25,52,75), "Tinggi": smf(a,60,80)}
 
-# ---------------------------------------------------------------------- #
-#  RULE BASE (16 rule, minimal tugas = 9 rule)                           #
-#  Desain: 9 rule INTI berupa matriks PENUH BMI x Gula Darah (3x3) yang  #
-#  dijamin SELALU ada minimal satu rule yang menyala untuk kombinasi     #
-#  BMI & Gula berapa pun (karena fungsi keanggotaan zmf/trimf/smf untuk  #
-#  kedua variabel ini didesain overlap kontinu tanpa celah di sepanjang  #
-#  domainnya). 7 rule TAMBAHAN (modifier) memakai Umur & Aktivitas Fisik #
-#  untuk menghaluskan/menegaskan hasil. Sebelumnya rule base lama hanya  #
-#  memakai kombinasi 3 variabel sekaligus untuk kategori "Tinggi"/       #
-#  "Sedang", sehingga ada kombinasi input (mis. Umur Tua + BMI Obesitas  #
-#  + Gula Prediabetes + Aktivitas Sedang) yang TIDAK match rule manapun  #
-#  -> semua alpha = 0 -> hasil keliru jatuh ke "Rendah". Sudah diuji     #
-#  exhaustive (grid umur x BMI x gula x aktivitas) dan rule base baru    #
-#  ini tidak punya celah seperti itu lagi.                               #
-# ---------------------------------------------------------------------- #
 RULES = [
-    # --- 9 rule inti: matriks BMI x Gula Darah (selalu ada yang aktif) ---
     (lambda u,b,g,a: min(b["Normal"],g["Normal"]),                   "Rendah","IF BMI Normal AND Gula Normal THEN Rendah"),
     (lambda u,b,g,a: min(b["Normal"],g["Prediabetes"]),              "Sedang","IF BMI Normal AND Gula Prediabetes THEN Sedang"),
     (lambda u,b,g,a: min(b["Normal"],g["Diabetes"]),                 "Tinggi","IF BMI Normal AND Gula Diabetes THEN Tinggi"),
@@ -58,7 +42,6 @@ RULES = [
     (lambda u,b,g,a: min(b["Obesitas"],g["Normal"]),                 "Sedang","IF BMI Obesitas AND Gula Normal THEN Sedang"),
     (lambda u,b,g,a: min(b["Obesitas"],g["Prediabetes"]),            "Tinggi","IF BMI Obesitas AND Gula Prediabetes THEN Tinggi"),
     (lambda u,b,g,a: min(b["Obesitas"],g["Diabetes"]),               "Tinggi","IF BMI Obesitas AND Gula Diabetes THEN Tinggi"),
-    # --- 7 rule modifier: Umur & Aktivitas Fisik ---
     (lambda u,b,g,a: min(u["Tua"],a["Rendah"]),                      "Tinggi","IF Umur Tua AND Aktivitas Rendah THEN Tinggi"),
     (lambda u,b,g,a: min(u["Tua"],b["Obesitas"]),                    "Tinggi","IF Umur Tua AND BMI Obesitas THEN Tinggi"),
     (lambda u,b,g,a: min(b["Obesitas"],a["Rendah"]),                 "Tinggi","IF BMI Obesitas AND Aktivitas Rendah THEN Tinggi"),
